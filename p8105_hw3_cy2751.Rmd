@@ -6,15 +6,79 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      fig.width = 8, 
+                      fig.height = 6,
+                      out.width = "90%")
 library(tidyverse)
 library(p8105.datasets)
-data("ny_noaa")
+library(ggridges)
+library(patchwork)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
 ## Problem 1
 ```{r}
+data("ny_noaa")
 
+(ny_noaa <- 
+  ny_noaa %>% 
+  separate(date, into = c("year", "month", "day"),sep = "-") %>% 
+  mutate(tmax = as.numeric(tmax),
+         tmin = as.numeric(tmin),
+         year = as.numeric(year),
+         month = as.numeric(month),
+         day = as.numeric(day)))
+
+ny_noaa %>% 
+  count(snow) %>%
+  arrange(desc(n))
 ```
+This `ny_noaa` dataset contains `r nrow(ny_noaa)` rows and `r ncol(ny_noaa)` columns. It includes variables `id` which is the weather station id, `date` of observation, precipitation in tenths of mm, snowfall in mm, `snwd` representing snow_depth in mm, and min and max temperature in tenths of degrees C.\
+
+We clean the data by creating separate variables for `year`, `month`, and `day` and converting them and `tmax` and `tmin` all to numeric variables. \
+We find that 0 is the most commonly observed value for snowfall by using `arrange()` function. This is because in NY, it is not likely to snow.\
+The second most commonly observed value is NA, indicating missing values. We can see this dataset miss huge amount of data. Other common values are 25, 31, 51 and 76, suggesting that snowfall is originally recorded in fractions of an inch and converted to mm.
+
+```{r}
+ny_noaa %>% 
+  filter(month == 1 | month == 7) %>% 
+  group_by(id,month,year) %>% 
+  summarize(avg_tmax = mean(tmax,na.rm = T)) %>% 
+  ggplot(aes(x = year, y = avg_tmax,group = id)) +
+  geom_point() + geom_line()+
+  facet_grid(. ~ month)+
+  labs(title = "Mean monthly temperature for each station across years for January and July")
+```
+As we can see, the average temperature in January is lower than that in July for all stations and among all years, which is under expectation. And all stations follow almost the same trend in the same month. There are truly some outliers, we can see the January in 1982 and 2005, it is much colder than usual; July in 1988 is also unexpected cold.
+
+```{r}
+tmin_tmax_hex <- ny_noaa %>% 
+  ggplot(aes(x = tmin, y = tmax))+
+  geom_hex()
+
+snow_ridge <- ny_noaa %>% 
+  filter(0<snow & snow < 100) %>% 
+  group_by(year) %>% 
+  ggplot(aes(x = snow,y = as.factor(year)))+
+  geom_density_ridges()
+
+tmin_tmax_hex + snow_ridge
+```
+Here are the hex and ridge plot:\
+For the hex plot, the majority of the data are centered in the middle for the distribution(which is shown as the lighter color). In the relatively rare cases, `tmax` is less than `tmin`, which might be caused by original data error.\
+For the ridge plot, the distribution of each year snowfall are all multi-peak.\
+For most of the stations, we see the snow is between 0 and 35 mm in a year.\
+Then there is a another group of stations that see about 45 mm of snow, and another group that sees nearly 75 mm.\
 
 ## Problem 2
 
