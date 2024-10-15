@@ -254,7 +254,7 @@ By comparing median of riding duration among different days in a week, we can se
 
 When it comes to comparison between January and July, we can see people tend to use Citi bike much longer in July than January, because January is still pretty cold while July is warm and people feel much comfortable riding bikes.\
 
-Comparing data from 2020 and 2024, we can see the duration that people use Citi bike is shorter in 2024. This situation may due to the transportation in 2024 is much convenient than 2020, we can see now we have bike specific lane, which can help people get to their destination faster.
+Comparing data from 2020 and 2024, we can see the duration that people use Citi bike is shorter in 2024. This situation may due to the transportation in 2024 is much convenient than 2020, we can see now we have bike specific lane, which can help people get to their destination faster. Also, more and more electric bikes are introduced and used, which can also shortened the riding time.
 
 ```{r}
 citi_all %>% filter(date == "jan_2024" | date == "jul_2024") %>% 
@@ -271,4 +271,4 @@ Month: In 2024, more people in July tends to have longer riding duration, especi
 
 Membership status: Members seem more likely to ride for shorter and compact trip every time they use the Citi bike, it may due to they have a lower fee every time activating a Citi bike,leading to frequent use but shorter duration, while causal riders want to make full use of every rides. Also, causal riders have more variability in riding duration.\
 
-Bike type: Electric bike seems to be used for longer duration, especially for causal users in january(colder weather). We can see electronic bike is more popular when people have a longer trip.
+Bike type: Electric bike seems to be used for longer duration in July while shorter in January. We can see electric bike is more popular when people want to have a leisure trip under a good weather condition. While in relatively cold weather, electric bike is more time-saving, for commuting purpose, electric bike using duration may be shorter than classic bikes.
