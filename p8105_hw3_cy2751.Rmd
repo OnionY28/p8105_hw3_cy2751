@@ -82,10 +82,17 @@ Then there is a another group of stations that see about 45 mm of snow, and anot
 
 ## Problem 2
 
+Below I import and clean the participant and accelerator datasets.\
+For participant dataset, I first exclude participants who are less than 21 years of age, and those with missing demographic data. And then I encode data with reasonable variable classes names and also sort them in order.\
+For accelerator dataset, I pivot this dataset longer so that every `mims` value has its row and we can use these data much convenient.\
+And finally, we merge these two datasets together.
+
 ```{r}
-participant_data <- 
+participant_data_origin <- 
   read_csv("hw3_data/nhanes_covar.csv",skip = 4,col_names = T, na = "NA") %>% 
-  janitor::clean_names()%>%
+  janitor::clean_names()
+
+participant_data <- participant_data_origin %>% 
   filter(!is.na(bmi) & !is.na(education)) %>% 
   filter(age >= 21) %>% 
   mutate(sex = as.factor(case_match(sex,1 ~ "male", 2 ~ "female")),
@@ -108,19 +115,29 @@ accelerometer_data <-
   mutate(min = as.integer(min))
 
 joint_acc_df <- left_join(participant_data,accelerometer_data,by = "seqn")
-
-participant_data %>% 
-  janitor::tabyl(education,sex) %>% 
-  knitr::kable()
 ```
 
 
 ```{r}
 participant_data %>% 
-  ggplot(aes(x = education, y = age,fill = sex))+
-  geom_boxplot(alpha = 0.3)
+  janitor::tabyl(education,sex) %>% 
+  knitr::kable(caption = "Number of Men and Women in Each Education Category")
 ```
-*** Missing Comment ***
+From this 2 by 2 table, we can see that for the people participating this research, in the category `less than high school`, the number of male and female are almost the same; while in `high school equivalent` category, there is more male than female; in `more than high school` category, the number of female is a little bit more than that of male. This shows that more males tend to proceed a high school equivalent degree than female, while when going further, the gender difference in higher degree disappears.
+
+
+```{r}
+participant_data %>% 
+  ggplot(aes(x = age, fill = sex))+
+  geom_density(alpha = 0.3)+
+  facet_grid(. ~ education)+
+  labs(title = "Age Distributions for Male and Female in Different Education Levels")
+```
+From this three-panel plot we can see, for the people attending this research:\
+The density distribution of male and female does not appear to have huge difference in category ` less than high school`, there is only a little bit more female at age between 55 and 70. We can see the distribution is skewed towards the older individuals, which means that individuals with lower educational are predominantly older, possibly reflecting that in previous decades, people have lower access to education .\
+In category `High school equivalent`, male people are merged between age 25 to 35 and age 50 to 70. These might be two generation of people. As we mentioned before, less female is in this category, and the female are merged at relative older age people.\
+For the last category, the density function are pretty alike for male and female and shows a strong peak in younger age groups for both genders, with women being slightly more represented. This suggests that younger individuals are more likely to achieve higher education nowadays.
+
 
 ```{r}
 joint_acc_df %>% group_by(seqn,age,sex,education) %>% 
@@ -128,20 +145,27 @@ joint_acc_df %>% group_by(seqn,age,sex,education) %>%
   ggplot(aes(x = age,y = total,color = sex))+
   geom_point(alpha = 0.3)+
   facet_grid(.~education)+
-  geom_smooth(se = F)
-```
-*** Missing Comment ***
-
-```{r fig.width=8, fig.height=6}
-joint_acc_df %>% group_by(min,education,sex) %>% 
-  summarize(mean_mims = mean(mims)) %>% 
-  ggplot(aes(x = min,y = mean_mims,color = sex))+
-  geom_point(alpha = 0.3)+
   geom_smooth(se = F)+
-  facet_grid(education ~ .)
+  labs(title = "Total MIMS Activity Among Age for different sex and education level")
 ```
+For all of these plots, we can see there is a trend that as people's age get larger, their total MIMS activity value goes down.\
+And it is interesting to see that higher education level can help people to remain at a higher total MIMS activity standard when age goes up. While lower education level people seems to have a higher total MIMS activity value when young.\
+In the category `Less than high school`, we can see there is a noticeable decrease in total activity for both gender after 60. For male, there is a worth mentioning increase in total activity between age 50 to 60. And for people at younger age, women's activity appears to be slightly higher than that for men.\
+In the category `High School equvient`, female seems to have higher total activity value than male most of the time. Male's total activity value tends to decrease since around 35 years old, and female's start around 40.\
+For people in category `more than high school`, female seems to have higher total activity value than male, but female's total activity drops relatively quick after age 60. Both male and female show a relatively stable activity level until about 60 years of age.
 
-*** Missing Comment ***
+```{r}
+joint_acc_df %>%
+  ggplot(aes(x = min,y = mims,color = sex,group =seqn))+
+  geom_line(alpha = 0.2)+
+  geom_smooth(aes(group = sex),se = F)+
+  facet_grid(. ~ education)+
+  labs(title = "24-hour Activity Time Courses Plot")
+```
+Across all education levels, we can see that there is a peak for activity levels appearing in the morning for everyone, and remain high during the day time, while the activity level is pretty low during sleep time. \
+Female generally shows a higher level of activity across all education levels and especially in `More than high school` category. This may due to different living habits between different gender.\
+What's more, people in higher education level tend to have more variability in their activity levels. Among all these plots we can say education is a influencing factor for physical activity value.\
+In the categories, `Less than high school` and `High School equvient`, there is almost no difference for physical activity value among genders.
 
 ## Problem 3
 
@@ -184,10 +208,8 @@ citi_all <- bind_rows(citi_jan_2020,citi_jan_2024,citi_jul_2020,
 *** describe the resulting dataset ***
 
 ```{r}
-citi_all %>% group_by(date,member_casual) %>% 
-  summarize(frcy = n()) %>% 
-  pivot_wider(names_from = "member_casual",
-              values_from = "frcy") %>% 
+citi_all %>% 
+  janitor::tabyl(date,member_casual) %>% 
   knitr::kable()
 ```
 
@@ -210,9 +232,9 @@ citi_all %>% separate(date,into = c("month","year"),sep = "_")%>%
                               "Thursday","Friday","Saturday","Sunday"))) %>% 
   group_by(year,month,weekdays) %>% 
   summarise(median_duration = median(duration)) %>% 
-  ggplot(aes(x = weekdays, y = median_duration,color = year,group = year))+
+  ggplot(aes(x = weekdays, y = median_duration,group = month,color = month))+
   geom_point()+ geom_line()+
-  facet_grid(.~month,labeller = as_labeller(c("jan" = "January","jul" = "July")))+
+  facet_grid(. ~ year )+
   theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
         legend.position = "bottom")
   
@@ -223,7 +245,7 @@ citi_all %>% separate(date,into = c("month","year"),sep = "_")%>%
 citi_all %>% filter(date == "jan_2024" | date == "jul_2024") %>% 
   group_by(date,rideable_type,member_casual) %>% 
   ggplot(aes(x = date,y = duration,fill = rideable_type))+
-  geom_boxplot()+
+  geom_violin()+
   facet_grid(. ~ member_casual)
 ```
 
