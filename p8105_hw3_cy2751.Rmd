@@ -160,7 +160,7 @@ joint_acc_df %>%
   geom_line(alpha = 0.2)+
   geom_smooth(aes(group = sex),se = F)+
   facet_grid(. ~ education)+
-  labs(title = "24-hour Activity Time Courses Plot")
+  labs(title = "24-hour Activity Time Courses Plot among different education levels")
 ```
 Across all education levels, we can see that there is a peak for activity levels appearing in the morning for everyone, and remain high during the day time, while the activity level is pretty low during sleep time. \
 Female generally shows a higher level of activity across all education levels and especially in `More than high school` category. This may due to different living habits between different gender.\
@@ -205,14 +205,19 @@ citi_jul_2024 <- read_csv("hw3_data/citibike/July 2024 Citi.csv") %>%
 citi_all <- bind_rows(citi_jan_2020,citi_jan_2024,citi_jul_2020,
                       citi_jul_2024)
 ```
-*** describe the resulting dataset ***
+This `citi_all` dataset contains `r nrow(citi_all)` rows and `r ncol(citi_all)` columns and it includes part of information about rides taken on the NYC Citi Bike system from January 2020, January 2024, July 2020 and July 2024, for each month, the information is saved in one file, and we combined all these four datasets together and resulting in this current large dataset. \
+This resulting dataset includes variables `id` which is the rider id, `rideable_type` showing if the bike is classic or electronic, `weekdays` showing on which weekday does this ride happened, `duration` shows the time this ride last in minutes,`start_station` and `end_station`, and `member_causal` showing if this rider is a member or not. There is also a `date` variable which is created when combining the dataset, it is used to identify the month and year this ride belongs to.\
+We clean the dataset by factoring `rideable_type`,`weekdays` and `member_casual` so that we can identify each categories in these variables clearly when analyzing. We also create a new variable `date` to identify the month and year this ride belongs to.
+
 
 ```{r}
 citi_all %>% 
   janitor::tabyl(date,member_casual) %>% 
-  knitr::kable()
+  knitr::kable(caption = "Number of Rides of Casual and Members")
 ```
-
+From this 2 by 2 table we can see that large amount of customers using the Citi Bike is members rather than causal riders. And in January 2020, which is the earliest data we can get, relatively less causal riders are willing to use Citi bike. While in July 2024, the newest data, larger proportion of causal riders are using Citi bike. It seems more people are using Citi bike not for commuting purpose but traveling or discovering NYC purpose nowadays. \
+By comparing data from 2020 and 2024, we can see more and more people started using Citi bikes and the number of members is growing large.\
+By comparing data from January and July, it is not surprising to see people are more likely to ride bikes in July, which has nicer weather and sun for riding a bike.
 
 ```{r}
 citi_jul_2024 %>% 
@@ -220,7 +225,7 @@ citi_jul_2024 %>%
   summarise(frcy = n()) %>% 
   arrange(desc(frcy)) %>% 
   head(5) %>% 
-  knitr::kable()
+  knitr::kable(caption = "Top 5 Popular Starting Stations for July 2024")
 ```
 
 
@@ -235,18 +240,28 @@ citi_all %>% separate(date,into = c("month","year"),sep = "_")%>%
   ggplot(aes(x = weekdays, y = median_duration,group = month,color = month))+
   geom_point()+ geom_line()+
   facet_grid(. ~ year )+
-  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
-        legend.position = "bottom")
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1))+
+  labs(title = "Trend of Median Ride Duration among weekdays, month and year")
   
 ```
-*** Comment ***
+By comparing median of riding duration among different days in a week, we can see that people have a higher riding duration using the Citi bikes on weekends, which may due to visitors and residents in NYC using Citi bike for hanging out or hiking all day long while less and stable demand from Monday to Friday, which is customers using Citi bikes for commuting purpose only. In 2020, the Citi bike duration on Saturday and Sunday is almost the same, while in 2024, the bike duration on Saturday is larger than that on Sunday. \
+
+When it comes to comparison between January and July, we can see people tend to use Citi bike much longer in July than January, because January is still pretty cold while July is warm and people feel much comfortable riding bikes.\
+
+Comparing data from 2020 and 2024, we can see the duration that people use Citi bike is shorter in 2024. This situation may due to the transportation in 2024 is much convenient than 2020, we can see now we have bike specific lane, which can help people get to their destination faster.
 
 ```{r}
 citi_all %>% filter(date == "jan_2024" | date == "jul_2024") %>% 
   group_by(date,rideable_type,member_casual) %>% 
   ggplot(aes(x = date,y = duration,fill = rideable_type))+
   geom_violin()+
-  facet_grid(. ~ member_casual)
+  facet_grid(. ~ member_casual)+
+  labs(title = "Distribution of Ride Duration in 2024")
 ```
+Most of the rider duration seems to concentrate between 0 min to 50 mins, with relatively small amount of people ride for over an hour.\
 
-*** Comment ***
+Month: In 2024, more people in July tends to have longer riding duration, especially for electric-bikes and causal riders. Better weather condition makes people more willing to ride a bike during leisure time and relax. In January, the riding duration is shorter.\
+
+Membership status: Members seem more likely to ride for shorter and compact trip every time they use the Citi bike, it may due to they have a lower fee every time activating a Citi bike,leading to frequent use but shorter duration, while causal riders want to make full use of every rides. Also, causal riders have more variability in riding duration.\
+
+Bike type: Electric bike seems to be used for longer duration, especially for causal users in january(colder weather). We can see electronic bike is more popular when people have a longer trip.
