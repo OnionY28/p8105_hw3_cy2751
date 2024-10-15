@@ -26,7 +26,9 @@ options(
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
+
 ## Problem 1
+
 ```{r}
 data("ny_noaa")
 
@@ -43,9 +45,10 @@ ny_noaa %>%
   count(snow) %>%
   arrange(desc(n))
 ```
+
 This `ny_noaa` dataset contains `r nrow(ny_noaa)` rows and `r ncol(ny_noaa)` columns. It includes variables `id` which is the weather station id, `date` of observation, precipitation in tenths of mm, snowfall in mm, `snwd` representing snow_depth in mm, and min and max temperature in tenths of degrees C.\
 
-We clean the data by creating separate variables for `year`, `month`, and `day` and converting them and `tmax` and `tmin` all to numeric variables. \
+We clean the data by creating separate variables for `year`, `month`, and `day` and converting them and `tmax` and `tmin` all to numeric variables.\
 We find that 0 is the most commonly observed value for snowfall by using `arrange()` function. This is because in NY, it is not likely to snow.\
 The second most commonly observed value is NA, indicating missing values. We can see this dataset miss huge amount of data. Other common values are 25, 31, 51 and 76, suggesting that snowfall is originally recorded in fractions of an inch and converted to mm.
 
@@ -59,6 +62,7 @@ ny_noaa %>%
   facet_grid(. ~ month)+
   labs(title = "Mean monthly temperature for each station across years for January and July")
 ```
+
 As we can see, the average temperature in January is lower than that in July for all stations and among all years, which is under expectation. And all stations follow almost the same trend in the same month. There are truly some outliers, we can see the January in 1982 and 2005, it is much colder than usual; July in 1988 is also unexpected cold.
 
 ```{r}
@@ -74,6 +78,7 @@ snow_ridge <- ny_noaa %>%
 
 tmin_tmax_hex + snow_ridge
 ```
+
 Here are the hex and ridge plot:\
 For the hex plot, the majority of the data are centered in the middle for the distribution(which is shown as the lighter color). In the relatively rare cases, `tmax` is less than `tmin`, which might be caused by original data error.\
 For the ridge plot, the distribution of each year snowfall are all multi-peak.\
@@ -117,14 +122,13 @@ accelerometer_data <-
 joint_acc_df <- left_join(participant_data,accelerometer_data,by = "seqn")
 ```
 
-
 ```{r}
 participant_data %>% 
   janitor::tabyl(education,sex) %>% 
   knitr::kable(caption = "Number of Men and Women in Each Education Category")
 ```
-From this 2 by 2 table, we can see that for the people participating this research, in the category `less than high school`, the number of male and female are almost the same; while in `high school equivalent` category, there is more male than female; in `more than high school` category, the number of female is a little bit more than that of male. This shows that more males tend to proceed a high school equivalent degree than female, while when going further, the gender difference in higher degree disappears.
 
+From this 2 by 2 table, we can see that for the people participating this research, in the category `less than high school`, the number of male and female are almost the same; while in `high school equivalent` category, there is more male than female; in `more than high school` category, the number of female is a little bit more than that of male. This shows that more males tend to proceed a high school equivalent degree than female, while when going further, the gender difference in higher degree disappears.
 
 ```{r}
 participant_data %>% 
@@ -133,11 +137,11 @@ participant_data %>%
   facet_grid(. ~ education)+
   labs(title = "Age Distributions for Male and Female in Different Education Levels")
 ```
+
 From this three-panel plot we can see, for the people attending this research:\
-The density distribution of male and female does not appear to have huge difference in category ` less than high school`, there is only a little bit more female at age between 55 and 70. We can see the distribution is skewed towards the older individuals, which means that individuals with lower educational are predominantly older, possibly reflecting that in previous decades, people have lower access to education .\
+The density distribution of male and female does not appear to have huge difference in category `less than high school`, there is only a little bit more female at age between 55 and 70. We can see the distribution is skewed towards the older individuals, which means that individuals with lower educational are predominantly older, possibly reflecting that in previous decades, people have lower access to education.\
 In category `High school equivalent`, male people are merged between age 25 to 35 and age 50 to 70. These might be two generation of people. As we mentioned before, less female is in this category, and the female are merged at relative older age people.\
 For the last category, the density function are pretty alike for male and female and shows a strong peak in younger age groups for both genders, with women being slightly more represented. This suggests that younger individuals are more likely to achieve higher education nowadays.
-
 
 ```{r}
 joint_acc_df %>% group_by(seqn,age,sex,education) %>% 
@@ -148,6 +152,7 @@ joint_acc_df %>% group_by(seqn,age,sex,education) %>%
   geom_smooth(se = F)+
   labs(title = "Total MIMS Activity Among Age for different sex and education level")
 ```
+
 For all of these plots, we can see there is a trend that as people's age get larger, their total MIMS activity value goes down.\
 And it is interesting to see that higher education level can help people to remain at a higher total MIMS activity standard when age goes up. While lower education level people seems to have a higher total MIMS activity value when young.\
 In the category `Less than high school`, we can see there is a noticeable decrease in total activity for both gender after 60. For male, there is a worth mentioning increase in total activity between age 50 to 60. And for people at younger age, women's activity appears to be slightly higher than that for men.\
@@ -162,7 +167,8 @@ joint_acc_df %>%
   facet_grid(. ~ education)+
   labs(title = "24-hour Activity Time Courses Plot among different education levels")
 ```
-Across all education levels, we can see that there is a peak for activity levels appearing in the morning for everyone, and remain high during the day time, while the activity level is pretty low during sleep time. \
+
+Across all education levels, we can see that there is a peak for activity levels appearing in the morning for everyone, and remain high during the day time, while the activity level is pretty low during sleep time.\
 Female generally shows a higher level of activity across all education levels and especially in `More than high school` category. This may due to different living habits between different gender.\
 What's more, people in higher education level tend to have more variability in their activity levels. Among all these plots we can say education is a influencing factor for physical activity value.\
 In the categories, `Less than high school` and `High School equvient`, there is almost no difference for physical activity value among genders.
@@ -205,17 +211,18 @@ citi_jul_2024 <- read_csv("hw3_data/citibike/July 2024 Citi.csv") %>%
 citi_all <- bind_rows(citi_jan_2020,citi_jan_2024,citi_jul_2020,
                       citi_jul_2024)
 ```
-This `citi_all` dataset contains `r nrow(citi_all)` rows and `r ncol(citi_all)` columns and it includes part of information about rides taken on the NYC Citi Bike system from January 2020, January 2024, July 2020 and July 2024, for each month, the information is saved in one file, and we combined all these four datasets together and resulting in this current large dataset. \
+
+This `citi_all` dataset contains `r nrow(citi_all)` rows and `r ncol(citi_all)` columns and it includes part of information about rides taken on the NYC Citi Bike system from January 2020, January 2024, July 2020 and July 2024, for each month, the information is saved in one file, and we combined all these four datasets together and resulting in this current large dataset.\
 This resulting dataset includes variables `id` which is the rider id, `rideable_type` showing if the bike is classic or electronic, `weekdays` showing on which weekday does this ride happened, `duration` shows the time this ride last in minutes,`start_station` and `end_station`, and `member_causal` showing if this rider is a member or not. There is also a `date` variable which is created when combining the dataset, it is used to identify the month and year this ride belongs to.\
 We clean the dataset by factoring `rideable_type`,`weekdays` and `member_casual` so that we can identify each categories in these variables clearly when analyzing. We also create a new variable `date` to identify the month and year this ride belongs to.
-
 
 ```{r}
 citi_all %>% 
   janitor::tabyl(date,member_casual) %>% 
   knitr::kable(caption = "Number of Rides of Casual and Members")
 ```
-From this 2 by 2 table we can see that large amount of customers using the Citi Bike is members rather than causal riders. And in January 2020, which is the earliest data we can get, relatively less causal riders are willing to use Citi bike. While in July 2024, the newest data, larger proportion of causal riders are using Citi bike. It seems more people are using Citi bike not for commuting purpose but traveling or discovering NYC purpose nowadays. \
+
+From this 2 by 2 table we can see that large amount of customers using the Citi Bike is members rather than causal riders. And in January 2020, which is the earliest data we can get, relatively less causal riders are willing to use Citi bike. While in July 2024, the newest data, larger proportion of causal riders are using Citi bike. It seems more people are using Citi bike not for commuting purpose but traveling or discovering NYC purpose nowadays.\
 By comparing data from 2020 and 2024, we can see more and more people started using Citi bikes and the number of members is growing large.\
 By comparing data from January and July, it is not surprising to see people are more likely to ride bikes in July, which has nicer weather and sun for riding a bike.
 
@@ -227,8 +234,6 @@ citi_jul_2024 %>%
   head(5) %>% 
   knitr::kable(caption = "Top 5 Popular Starting Stations for July 2024")
 ```
-
-
 
 ```{r}
 citi_all %>% separate(date,into = c("month","year"),sep = "_")%>% 
@@ -244,7 +249,8 @@ citi_all %>% separate(date,into = c("month","year"),sep = "_")%>%
   labs(title = "Trend of Median Ride Duration among weekdays, month and year")
   
 ```
-By comparing median of riding duration among different days in a week, we can see that people have a higher riding duration using the Citi bikes on weekends, which may due to visitors and residents in NYC using Citi bike for hanging out or hiking all day long while less and stable demand from Monday to Friday, which is customers using Citi bikes for commuting purpose only. In 2020, the Citi bike duration on Saturday and Sunday is almost the same, while in 2024, the bike duration on Saturday is larger than that on Sunday. \
+
+By comparing median of riding duration among different days in a week, we can see that people have a higher riding duration using the Citi bikes on weekends, which may due to visitors and residents in NYC using Citi bike for hanging out or hiking all day long while less and stable demand from Monday to Friday, which is customers using Citi bikes for commuting purpose only. In 2020, the Citi bike duration on Saturday and Sunday is almost the same, while in 2024, the bike duration on Saturday is larger than that on Sunday.\
 
 When it comes to comparison between January and July, we can see people tend to use Citi bike much longer in July than January, because January is still pretty cold while July is warm and people feel much comfortable riding bikes.\
 
@@ -258,6 +264,7 @@ citi_all %>% filter(date == "jan_2024" | date == "jul_2024") %>%
   facet_grid(. ~ member_casual)+
   labs(title = "Distribution of Ride Duration in 2024")
 ```
+
 Most of the rider duration seems to concentrate between 0 min to 50 mins, with relatively small amount of people ride for over an hour.\
 
 Month: In 2024, more people in July tends to have longer riding duration, especially for electric-bikes and causal riders. Better weather condition makes people more willing to ride a bike during leisure time and relax. In January, the riding duration is shorter.\
